@@ -6,6 +6,10 @@ from PySide6.QtCore import Qt
 import numpy as  np
 import matplotlib.pyplot as plt
 import pandas as pd
+import graph_maker_backend as gf
+
+
+
 
 class MainWindow(pq.QMainWindow):
     def __init__(self):
@@ -16,20 +20,41 @@ class MainWindow(pq.QMainWindow):
         self.model = None
         self.file_path = None
         self.df = None
+        self.check_window = None
+        self.col_list = None
         
-        
+        #Open file button
         self.button = pq.QPushButton("Open File")
         self.button.clicked.connect(self.set_df)
 
         self.layout = pq.QGridLayout()
 
         self.layout.addWidget(self.button, 0, 0)
-        self.layout.addWidget(self.table, 1, 1, 5, 5)
+        self.layout.addWidget(self.table, 1, 0, 5, 5)
 
         #checkbox to change if the first column of the df is to be used as index
         self.checkbox = pq.QCheckBox("Use first column as index")
         self.checkbox.stateChanged.connect(self.index_change)
-        self.layout.addWidget(self.checkbox)
+        self.layout.addWidget(self.checkbox, 6, 0)
+
+        self.check_button = pq.QPushButton("Select columns for Graph")
+        self.check_button.clicked.connect(self.open_check_window)
+        self.layout.addWidget(self.check_button, 0, 1)
+
+
+        #combobox to select graph type
+        self.combox = pq.QComboBox()
+        #types of plots implemented here
+        self.combox.addItems(["Line Plot", "Scatter Plot", "Bar Plot", "Step Plot"])
+        self.layout.addWidget(self.combox, 6, 1)
+
+        #button to make graph
+        self.button_graph_maker = pq.QPushButton("Make Graph")
+        self.button_graph_maker.clicked.connect(self.make_graph)
+        self.layout.addWidget(self.button_graph_maker, 0, 2)
+
+        
+
 
         widget = pq.QWidget()
         widget.setLayout(self.layout)
@@ -37,13 +62,15 @@ class MainWindow(pq.QMainWindow):
 
         self.setCentralWidget(widget)
 
+
+    #open file dialog and set dataframe. make model and show table in layout
     def set_df(self, e):
         self.open_file(e)
         if self.df.columns[0].lower() == "id" or "index":
             self.checkbox.setCheckState(pc.Qt.CheckState.Checked)
             self.df = self.df.set_index(self.df.columns[0])
 
-        self.model = TableModel(self.df)
+        self.model = gf.TableModel(self.df)
         self.table.setModel(self.model)
 
 
@@ -60,46 +87,33 @@ class MainWindow(pq.QMainWindow):
             #file = pd.read_csv(self.file_path[0])
             #self.df = pd.DataFrame(file)
             self.df = self.df.set_index(self.df.columns[0])
-            self.model = TableModel(self.df)
+            self.model = gf.TableModel(self.df)
             self.table.setModel(self.model)
         else:
             #reread the file
             file = pd.read_csv(self.file_path[0])
             self.df = pd.DataFrame(file)
-            self.model = TableModel(self.df)
+            self.model = gf.TableModel(self.df)
             self.table.setModel(self.model)
-        
 
-#creating a class for a dataframe table widget
-class TableModel(pc.QAbstractTableModel):
-    def __init__(self, data):
-        super(TableModel, self).__init__()
-        #_data from parent class 
-        self._data = data
+    #opens second window with checkboxes
+    def open_check_window(self, e):
+        self.check_window = gf.Check_Window(gf.graph_availability(self.df))
+        self.check_window.show()
+        #custom  Signal from class Check_Window
+        self.check_window.window_close_Signal.connect(self.set_col_list)
 
-    #the functions data, rowCount, columnCount and headerData are needed to be named this way from the parent class QAbstractTableModel
-    #if more functionability is needed, then implement:
-    # -setData() for being editable
-    # -flags() to return a value containing ItemIsEditable
-    # -insertRows() , removeRows() , insertColumns() , and removeColumns() to provide an interface for a resizebale data structure
-    def data (self, index, role):
-        if role == Qt.DisplayRole:
-            value = self._data.iloc[index.row(), index.column()]
-            return str(value)
-        
-    def rowCount(self, index):
-        return self._data.shape[0]
-
-    def columnCount(self, index):
-        return self._data.shape[1]
+    #making the graph, list refers to the list of checked clomuns
+    def make_graph(self, liste):
+        for i in range(len(liste)):
+            if liste[i].value == pc.Qt.CheckState.Checked.value:
+                print(self.df.columns[i])
     
-    def headerData(self, section, orientation, role):
-        if role == pc.Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
-                return str(self._data.columns[section])
+    def set_col_list(self, liste):
+        self.col_list = liste
 
-            if orientation == Qt.Vertical:
-                return str(self._data.index[section])
+
+
 
 
     
