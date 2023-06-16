@@ -45,10 +45,10 @@ class MainWindow(pq.QMainWindow):
 
 
         #combobox to select graph type
-        self.combox = pq.QComboBox()
+        self.type_selection = pq.QComboBox()
         #types of plots implemented here
-        self.combox.addItems(["Line Plot", "Scatter Plot"])
-        self.layout.addWidget(self.combox, 6, 1)
+        self.type_selection.addItems(["Line Plot", "Scatter Plot"])
+        self.layout.addWidget(self.type_selection, 6, 1)
 
         #button to make graph
         self.button_graph_maker = pq.QPushButton("Make Graph")
@@ -107,14 +107,23 @@ class MainWindow(pq.QMainWindow):
         self.check_window.window_close_Signal.connect(self.set_col_list)
 
     def open_check_window_scatter(self):
-        pass
+        availability_list = gf.graph_availability(self.df)
+        #2 stands for checked
+        if self.checkbox.checkState().value == 2:
+            availability_list.insert(0, "index")
+
+        dia = gf.ScatterDialog(availability_list, self)
+        dia.window_close_Signal.connect(self.make_graph_scatter)
+        dia.exec()
+
+        
         
 
     #making the graph, list refers to the list of checked columns
     def make_graph(self):
-        if self.combox.currentText() == "Line Plot":
+        if self.type_selection.currentText() == "Line Plot":
             self.open_check_window_line()
-        elif self.combox.currentText() == "Scatter Plot":
+        elif self.type_selection.currentText() == "Scatter Plot":
             self.open_check_window_scatter()
             
     #set column list and open window for additional graph data
@@ -131,8 +140,6 @@ class MainWindow(pq.QMainWindow):
         
     #making a line graph
     def make_graph_line(self, liste):
-        print(int(liste[2]))
-        print(self.col_list)
         #liste: xlabel, yalabel, offset (offset default = 0), title
         fig, ax = plt.subplots(figsize=(16, 9))
         for col in self.col_list:
@@ -147,6 +154,33 @@ class MainWindow(pq.QMainWindow):
         else:
             graph_name = liste[4] + ".jpg"
         plt.savefig(graph_name, dpi=150)
+
+    def make_graph_scatter(self, liste):
+        #liste: x-axis, x_label, y-axis, y_label, titel, file_name
+        #if statements to account for self added index 
+        if liste[0] == "index" and liste[2] != "index":
+            fig, ax = plt.subplots(figsize=(16, 10))
+            ax.scatter(self.df.index, self.df[liste[2]], s=50, facecolor='C0', edgecolor='k')
+        elif liste[2] == "index" and liste[0] != "index":
+            fig, ax = plt.subplots(figsize=(16, 10))
+            ax.scatter(self.df[liste[0]], self.df.index, s=50, facecolor='C0', edgecolor='k')
+        elif liste[0] == "index" and liste[0] == "index":
+            fig, ax = plt.subplots(figsize=(16, 10))
+            ax.scatter(self.df.index, self.df.index, s=50, facecolor='C0', edgecolor='k')
+        else:
+            fig, ax = plt.subplots(figsize=(16, 10))
+            ax.scatter(self.df[liste[0]], self.df[liste[2]], s=50, facecolor='C0', edgecolor='k')
+        #default file name
+        if liste[5] == "":
+            file_name = "scatter.jpg"
+        else:
+            file_name = liste[5] + ".jpg"
+
+        ax.set_xlabel(liste[1])
+        ax.set_ylabel(liste[3])
+        ax.set_title(liste[4])
+        plt.savefig(file_name, dpi=150)
+        
 
         
     

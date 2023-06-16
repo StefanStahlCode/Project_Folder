@@ -129,13 +129,13 @@ class LineDialog(pq.QDialog):
 
 
         self.buttonBox = pq.QDialogButtonBox(button_box)
-        #connecting accepetd and rejected methods to buttons ok and cancel
+
         self.buttonBox.accepted.connect(self.pressed_ok)
         self.buttonBox.rejected.connect(self.reject)
         
         self.layout = pq.QGridLayout()
 
-        message = pq.QLabel("Please give more info for the Graph")
+        message = pq.QLabel("Please fill out Graph info")
 
         #info needed: xlabel, yalabel, x-axis, titele
         self.xlabel = pq.QLineEdit()
@@ -186,4 +186,67 @@ class LineDialog(pq.QDialog):
         else:
             self.offset.setEnabled(True)
 
+
+
+
+#class to make a window for the scatter plot data
+class ScatterDialog(pq.QDialog):
+    window_close_Signal = pc.Signal(list)
+    def __init__(self, col_list, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle("Dialog Window")
+
+        
+        button_box = pq.QDialogButtonBox.Ok | pq.QDialogButtonBox.Cancel
+
+
+        self.buttonBox = pq.QDialogButtonBox(button_box)
+        
+        self.buttonBox.accepted.connect(self.pressed_ok)
+        self.buttonBox.rejected.connect(self.reject)
+        
+        self.layout = pq.QVBoxLayout()
+        #line edits and comboboxes for x_axis, x-label, y_axis, y-label, title, file name
+        self.x_axis = pq.QComboBox()
+        self.x_axis.addItems(col_list)
+        self.x_label = pq.QLineEdit()
+        self.x_label.setPlaceholderText("set x axis")
+
+        self.y_axis = pq.QComboBox()
+        self.y_axis.addItems(col_list)
+        self.y_label = pq.QLineEdit()
+        self.y_label.setPlaceholderText("set y axis")
+
+        self.title = pq.QLineEdit()
+        self.title.setPlaceholderText("Set Title")
+
+        self.file_name = pq.QLineEdit()
+        self.file_name.setPlaceholderText("set file name")
+
+        self.layout.addWidget(self.x_axis)
+        self.layout.addWidget(self.x_label)
+        self.layout.addWidget(self.y_axis)
+        self.layout.addWidget(self.y_label)
+        self.layout.addWidget(self.title)
+        self.layout.addWidget(self.file_name)
+
+
+        message = pq.QLabel("Please fill out Graph info")
+        self.layout.addWidget(message)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
+
+
+    def pressed_ok(self):
+        return_list = []
+        return_list.append(self.x_axis.currentText())
+        return_list.append(self.x_label.text())
+        return_list.append(self.y_axis.currentText())
+        return_list.append(self.y_label.text())
+        return_list.append(self.title.text())
+        return_list.append(self.file_name.text())
+
+        self.window_close_Signal.emit(return_list)
+        self.close()
 
