@@ -117,3 +117,73 @@ def graph_availability(df):
 
     return ret_list
 
+class LineDialog(pq.QDialog):
+    window_close_Signal = pc.Signal(list)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.info_list = []
+        self.setWindowTitle("Dialog Window")
+
+        
+        button_box = pq.QDialogButtonBox.Ok | pq.QDialogButtonBox.Cancel
+
+
+        self.buttonBox = pq.QDialogButtonBox(button_box)
+        #connecting accepetd and rejected methods to buttons ok and cancel
+        self.buttonBox.accepted.connect(self.pressed_ok)
+        self.buttonBox.rejected.connect(self.reject)
+        
+        self.layout = pq.QGridLayout()
+
+        message = pq.QLabel("Please give more info for the Graph")
+
+        #info needed: xlabel, yalabel, x-axis, titele
+        self.xlabel = pq.QLineEdit()
+        self.ylabel = pq.QLineEdit()
+        self.combox = pq.QComboBox()
+        self.combox.addItems(["Use Index as x x-axis", "Use index with Offset as x-axis"])
+        self.combox.currentIndexChanged.connect(self.offset_enable)
+        self.offset = pq.QLineEdit()
+        self.offset.setEnabled(False)
+        self.title = pq.QLineEdit()
+        self.file_name = pq.QLineEdit()
+        
+
+        self.xlabel.setPlaceholderText("Insert x label")
+        self.ylabel.setPlaceholderText("Insert y label")
+        self.offset.setPlaceholderText("Set offset for index")
+        self.title.setPlaceholderText("Set graph title")
+        self.file_name.setPlaceholderText("Graph")
+
+        self.layout.addWidget(self.xlabel, 1, 0)
+        self.layout.addWidget(self.ylabel, 2, 0)
+        self.layout.addWidget(self.combox, 3, 0)
+        self.layout.addWidget(self.offset, 3, 1)
+        self.layout.addWidget(self.title, 4, 0)
+        self.layout.addWidget(self.file_name, 5, 0)
+        self.layout.addWidget(message, 0, 0)
+        self.layout.addWidget(self.buttonBox, 6, 0)
+        self.setLayout(self.layout)
+    
+    def pressed_ok(self):
+        self.info_list.append(self.xlabel.text())
+        self.info_list.append(self.ylabel.text())
+        #self.info_list.append(self.combox.currentIndex())
+        try:
+            self.info_list.append(int(self.offset.text()))
+        except ValueError:
+            print("Offset needs to be a integer, set to 0")
+            self.info_list.append(0)
+
+        self.info_list.append(self.title.text())
+        self.info_list.append(self.file_name.text())
+        self.window_close_Signal.emit(self.info_list)
+        self.close()
+
+    def offset_enable(self, id):
+        if id == 0:
+            self.offset.setEnabled(False)
+        else:
+            self.offset.setEnabled(True)
+
+
