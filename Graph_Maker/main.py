@@ -140,7 +140,7 @@ class MainWindow(pq.QMainWindow):
         
     #making a line graph
     def make_graph_line(self, liste):
-        #liste: xlabel, yalabel, offset (offset default = 0), title
+        #liste: xlabel, yalabel, offset (offset default = 0), title, file name, file extension
         fig, ax = plt.subplots(figsize=(16, 9))
         for col in self.col_list:
             ax.plot((self.df.index + int(liste[2])), self.df[col], label=col)
@@ -150,17 +150,17 @@ class MainWindow(pq.QMainWindow):
         ax.set_title(liste[3])
         ax.legend()
         if liste[4] == "":
-            graph_name= "graph.jpg"
+            graph_name= "graph.jpg" + liste[5]
         else:
-            graph_name = liste[4] + ".jpg"
+            graph_name = liste[4] + liste[5]
         plt.savefig(graph_name, dpi=150)
 
     def make_graph_scatter(self, liste):
-        #liste: x-axis, x_label, y-axis, y_label, titel, file_name
+        #liste: x-axis, x_label, y-axis, y_label, titel, file_name, file extension
         #if statements to account for self added index 
         if liste[0] == "index" and liste[2] != "index":
             fig, ax = plt.subplots(figsize=(16, 10))
-            ax.scatter(self.df.index, self.df[liste[2]], s=50, facecolor='C0', edgecolor='k')
+            ax.scatter(self.df.index, self.df[liste[2]], s=20, facecolor='C0', edgecolor='k')
         elif liste[2] == "index" and liste[0] != "index":
             fig, ax = plt.subplots(figsize=(16, 10))
             ax.scatter(self.df[liste[0]], self.df.index, s=50, facecolor='C0', edgecolor='k')
@@ -172,9 +172,9 @@ class MainWindow(pq.QMainWindow):
             ax.scatter(self.df[liste[0]], self.df[liste[2]], s=50, facecolor='C0', edgecolor='k')
         #default file name
         if liste[5] == "":
-            file_name = "scatter.jpg"
+            file_name = "scatter" + liste[6]
         else:
-            file_name = liste[5] + ".jpg"
+            file_name = liste[5] + liste[6]
 
         ax.set_xlabel(liste[1])
         ax.set_ylabel(liste[3])

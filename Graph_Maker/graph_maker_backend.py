@@ -147,6 +147,8 @@ class LineDialog(pq.QDialog):
         self.offset.setEnabled(False)
         self.title = pq.QLineEdit()
         self.file_name = pq.QLineEdit()
+        self.file_ext = pq.QComboBox()
+        
         
 
         self.xlabel.setPlaceholderText("Insert x label")
@@ -154,6 +156,7 @@ class LineDialog(pq.QDialog):
         self.offset.setPlaceholderText("Set offset for index")
         self.title.setPlaceholderText("Set graph title")
         self.file_name.setPlaceholderText("Graph")
+        self.file_ext.addItems([".pdf", ".jpg", ".png", ".svg"])
 
         self.layout.addWidget(self.xlabel, 1, 0)
         self.layout.addWidget(self.ylabel, 2, 0)
@@ -161,6 +164,7 @@ class LineDialog(pq.QDialog):
         self.layout.addWidget(self.offset, 3, 1)
         self.layout.addWidget(self.title, 4, 0)
         self.layout.addWidget(self.file_name, 5, 0)
+        self.layout.addWidget(self.file_ext, 5, 1)
         self.layout.addWidget(message, 0, 0)
         self.layout.addWidget(self.buttonBox, 6, 0)
         self.setLayout(self.layout)
@@ -177,6 +181,7 @@ class LineDialog(pq.QDialog):
 
         self.info_list.append(self.title.text())
         self.info_list.append(self.file_name.text())
+        self.info_list.append(self.file_ext.currentText())
         self.window_close_Signal.emit(self.info_list)
         self.close()
 
@@ -224,12 +229,16 @@ class ScatterDialog(pq.QDialog):
         self.file_name = pq.QLineEdit()
         self.file_name.setPlaceholderText("set file name")
 
+        self.file_ext = pq.QComboBox()
+        self.file_ext.addItems([".pdf", ".jpg", ".png", ".svg"])
+
         self.layout.addWidget(self.x_axis)
         self.layout.addWidget(self.x_label)
         self.layout.addWidget(self.y_axis)
         self.layout.addWidget(self.y_label)
         self.layout.addWidget(self.title)
         self.layout.addWidget(self.file_name)
+        self.layout.addWidget(self.file_ext)
 
 
         message = pq.QLabel("Please fill out Graph info")
@@ -246,6 +255,7 @@ class ScatterDialog(pq.QDialog):
         return_list.append(self.y_label.text())
         return_list.append(self.title.text())
         return_list.append(self.file_name.text())
+        return_list.append(self.file_ext.currentText())
 
         self.window_close_Signal.emit(return_list)
         self.close()
